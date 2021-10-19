@@ -4,6 +4,10 @@ import {renderViewCreator} from "./render-view-creator.js"
 import {html} from "../../../../../../framework/component.js"
 import {snapstate} from "../../../../../../toolbox/snapstate/snapstate.js"
 import {makeContentModel} from "../../../../models/parts/content-model.js"
+import triangle from "../../../../../../framework/icons/triangle.svg.js"
+import styles from "../../xiome-video-display.css.js"
+import {ComponentWithShare, mixinStyles, property} from "../../../../../../framework/component.js"
+
 
 export function videoControls({
 		queryAll,
@@ -32,9 +36,9 @@ export function videoControls({
 
 		return html`
 			<h2>
-				<span>video display controls</span>
+				<span>Video display controls</span>
 				<xio-button @press=${toggleControls}>
-					${readable.open ? "close" : "open"}
+					${readable.open ? html`<div class="open">${triangle}</div>` : html`<div class="close">${triangle}</div>`}
 				</xio-button>
 			</h2>
 			${readable.open ? html`
