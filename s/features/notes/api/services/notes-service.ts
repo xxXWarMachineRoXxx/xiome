@@ -48,31 +48,28 @@ export const makeNotesService = ({
 		},
 
 		async getNewNotes(
-				{notesTables, access},
-				{offset, limit}: Pagination
-			): Promise<Notes.Any[]> {
-					const {userId} = access.user
-					const newNotes = await notesTables.notes.read({
-						...find({userId: DamnId.fromString(userId),
-						old: false}),
-						offset: 0,
-						limit: 10,
-						order: {time: "descend"}
-					})
-					// return newNotes
-			return [
-				{
-					type: "message",
-					noteId: undefined,
-					time: Date.now(),
-					old: false,
-					from: undefined,
-					to: undefined,
-					text: "text",
-					title: "title",
-					details: {},
-				}
-			]
+					{notesTables, access},
+					{offset, limit}: Pagination
+				): Promise<Notes.Any[]> {
+			const {userId} = access.user
+			const newNotes = await notesTables.notes.read({
+				...find({userId: DamnId.fromString(userId),
+				old: false}),
+				offset: 0,
+				limit: 10,
+				order: {time: "descend"}
+			})
+			return newNotes.map(note => ({
+				noteId: note.noteId.toString(),
+				type: "message",
+				to: note.to.toString(),
+				from: note.from.toString(),
+				title: note.title,
+				text: note.text,
+				old: note.old,
+				time: note.time,
+				details: {},
+			}))
 		},
 
 		async getOldNotes(
