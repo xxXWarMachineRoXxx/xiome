@@ -5,8 +5,6 @@ import {html} from "../../../../../../framework/component.js"
 import {snapstate} from "../../../../../../toolbox/snapstate/snapstate.js"
 import {makeContentModel} from "../../../../models/parts/content-model.js"
 import triangle from "../../../../../../framework/icons/triangle.svg.js"
-import styles from "../../xiome-video-display.css.js"
-import {ComponentWithShare, mixinStyles, property} from "../../../../../../framework/component.js"
 
 
 export function videoControls({
@@ -38,11 +36,11 @@ export function videoControls({
 			<h2>
 				<span>Video display controls</span>
 				<xio-button @press=${toggleControls}>
-					${readable.open ? html`<div class="open">${triangle}</div>` : html`<div class="close">${triangle}</div>`}
+					${readable.open ? html`<div class="open">${triangle}</div>` : html`<div>${triangle}</div>`}
 				</xio-button>
 			</h2>
 			${readable.open ? html`
-				<p>this view <em>"${label}"</em></p>
+				<p>label = <em>"${label}"</em></p>
 				${currentView
 					? renderView({
 						view: currentView,
@@ -59,6 +57,7 @@ export function videoControls({
 							|| readable.selectedPrivileges.length === 0,
 						onCatalogSelect: index => {
 							writable.selectedContent = index
+
 						},
 						onPrivilegesSelect: privileges => {
 							writable.selectedPrivileges = privileges
