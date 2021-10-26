@@ -13,6 +13,10 @@ import {NotesAuth, NotesMeta} from "../types/notes-auth.js"
 import {find} from "../../../../toolbox/dbby/dbby-helpers.js"
 import {timeLog} from "console"
 import {timestamp} from "../../../../toolbox/logger/timestamp.js"
+import {max, min, number, schema, validator} from "../../../../toolbox/darkvalley.js"
+import {ApiError} from "renraku/x/api/api-error.js"
+import {runValidation} from "../../../../toolbox/topic-validation/run-validation.js"
+import {validatePagination} from "../validation/validate-pagination.js"
 
 export const makeNotesService = ({
 		config, basePolicy,
@@ -48,18 +52,23 @@ export const makeNotesService = ({
 		},
 		
 		async getNewNotes(
-			{notesTables, access},
-			{offset, limit}: Pagination
+				{notesTables, access},
+				pagination: Pagination
 			): Promise<Notes.Any[]> {
-				const maximumNotesPageSize = 10;
-				const {userId} = access.user
-				const newNotes = await notesTables.notes.read({
-						...find({userId: DamnId.fromString(userId),
-						old: false}),
-						offset: 0,
-						limit: maximumNotesPageSize,
-						order: {time: "descend"}
-					})
+
+			const {offset, limit} = runValidation(pagination, validatePagination)
+			const {userId} = access.user
+
+			const newNotes = await notesTables.notes.read({
+				...find({
+					userId: DamnId.fromString(userId),
+					old: false,
+				}),
+				offset,
+				limit,
+				order: {time: "descend"}
+			})
+
 			return newNotes.map(note => ({
 				type: "message",
 				noteId: note.noteId.toString(),
@@ -75,28 +84,33 @@ export const makeNotesService = ({
 
 		async getOldNotes(
 				{notesTables, access},
-				{offset, limit}: Pagination
+				pagination: Pagination
 			): Promise<Notes.Any[]> {
-					const maximumNotesPageSize = 10;
-					const {userId} = access.user
-					const oldNotes = await notesTables.notes.read({
-						...find({userId: DamnId.fromString(userId),
-						old: true}),
-						offset: 0,
-						limit: maximumNotesPageSize,
-						order: {time: "descend"}
-					})
-					return oldNotes.map(note => ({
-						type: "message",
-						noteId: note.noteId.toString(),
-						time: note.time,
-						old: note.old,
-						from: undefined,
-						to: note.to.toString(),
-						text: note.text,
-						title: note.title,
-						details: {},
-					}))
+
+			const {offset, limit} = runValidation(pagination, validatePagination)
+			const {userId} = access.user
+
+			const oldNotes = await notesTables.notes.read({
+				...find({
+					userId: DamnId.fromString(userId),
+					old: true,
+				}),
+				offset,
+				limit,
+				order: {time: "descend"},
+			})
+
+			return oldNotes.map(note => ({
+				type: "message",
+				noteId: note.noteId.toString(),
+				time: note.time,
+				old: note.old,
+				from: undefined,
+				to: note.to.toString(),
+				text: note.text,
+				title: note.title,
+				details: {},
+			}))
 		},
 	},
 })
