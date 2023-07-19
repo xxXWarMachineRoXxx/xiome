@@ -4,8 +4,8 @@ import {renderViewCreator} from "./render-view-creator.js"
 import {html} from "../../../../../../framework/component.js"
 import {snapstate} from "../../../../../../toolbox/snapstate/snapstate.js"
 import {makeContentModel} from "../../../../models/parts/content-model.js"
-import triangle from "../../../../../../framework/icons/triangle.svg.js"
 
+import triangle from "../../../../../../framework/icons/triangle.svg.js"
 
 export function videoControls({
 		queryAll,
@@ -30,14 +30,16 @@ export function videoControls({
 	function render(label: string) {
 		const currentView = model.getView(label)
 		return html`
-			<h3 class=controls-title>
+			<h3 class=controls-title ?data-open=${readable.open}>
 				<div>
-					<span>Video display controls</span>
+					<span>video display controls</span>
 					<span>label = <em>"${label}"</em></span>
 				</div>
-				<xio-button @press=${toggleControls}>
-					${readable.open ? html`<xio-button class="open" ?data-open=${readable.open} title="close video controls">${triangle}</xio-button>`
-					: html`<xio-button ?data-open=${readable.open} title="open video controls">${triangle}</xio-button>`}
+				<xio-button
+					class=togglebutton
+					title="${readable.open ? "close" : "open"} video controls"
+					@press=${toggleControls}>
+						${triangle}
 				</xio-button>
 			</h3>
 			${readable.open ? html`
@@ -52,12 +54,16 @@ export function videoControls({
 						catalogOp: model.state.catalogOp,
 						privilegesOp: model.state.privilegesOp,
 						isContentSelected: readable.selectedContent !== undefined,
+						selectedContent: readable.selectedContent,
 						isCreateButtonDisabled:
 							readable.selectedContent === undefined
 							|| readable.selectedPrivileges.length === 0,
 						onCatalogSelect: index => {
 							writable.selectedContent = index
-
+							writable.selectedPrivileges = []
+						},
+						isPrivilegeSelected: id => {
+							return readable.selectedPrivileges.some(e => e === id)
 						},
 						onPrivilegesSelect: privileges => {
 							writable.selectedPrivileges = privileges
